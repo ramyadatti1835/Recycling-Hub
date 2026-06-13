@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Waste Recognizer</title>
+
+  <!-- Optional: link to external style if needed -->
+  <!-- <link rel="stylesheet" href="/static/style.css"> -->
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      text-align: center;
+    }
+
+    .container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 500px;
+    }
+
+    input[type="text"],
+    input[type="file"] {
+      margin-top: 15px;
+      padding: 10px;
+      width: 100%;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+   <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+  <div class="container">
+    <h2>Smart Waste Recognizer</h2>
+    
+    <!-- Text input -->
+    <input type="text" id="itemName" placeholder="Type an item (e.g., bottle, food)" />
+    <button onclick="recognizeByName()">Recognize by Name</button>
+    
+    <p style="margin: 20px 0;">OR</p>
+
+    <!-- Image input -->
+    <input type="file" accept="image/*" capture="environment" id="cameraInput" onchange="simulateImageRecognition()">
+    
+    <p id="result">Prediction will appear here</p>
+    <button onclick="window.location.href='dashboard.html'">Back to Dashboard</button>
+  </div>
+
+  <script>
+    async function recognizeByName() {
+      const itemName = document.getElementById('itemName').value.trim().toLowerCase();
+      const result = document.getElementById('result');
+
+      if (!itemName) {
+        result.textContent = "Please type an item name.";
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/api/items/${encodeURIComponent(itemName)}`);
+        if (!response.ok) {
+          throw new Error("Item not found or backend issue.");
+        }
+
+        const data = await response.json();
+        if (data.is_recyclable === "YES") {
+          result.innerHTML = "♻ <strong>Recyclable</strong>: Yes (from database)";
+        } else if (data.is_recyclable === "NO") {
+          result.innerHTML = "❌ <strong>Recyclable</strong>: No (from database)";
+        } else {
+          result.innerHTML = "⚠ <strong>Unknown</strong>: Not specified in database";
+        }
+      } catch (err) {
+        result.innerHTML = "⚠ <strong>Error</strong>: " + err.message;
+      }
+    }
+
+    function simulateImageRecognition() {
+      const fileInput = document.getElementById('cameraInput');
+      const result = document.getElementById('result');
+
+      if (!fileInput.files.length) {
+        result.textContent = "No image selected.";
+        return;
+      }
+
+      const fakeName = fileInput.files[0].name.toLowerCase();
+      if (fakeName.includes("plastic") || fakeName.includes("paper") || fakeName.includes("bottle")) {
+        result.innerHTML = "📸 ♻ <strong>Recyclable</strong>: Yes (simulated)";
+      } else if (fakeName.includes("food") || fakeName.includes("banana")) {
+        result.innerHTML = "📸 ❌ <strong>Recyclable</strong>: No (simulated)";
+      } else {
+        result.innerHTML = "📸 ⚠ <strong>Unknown</strong>: Cannot determine";
+      }
+    }
+  </script>
+</body>
+</html>

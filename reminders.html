@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Reminders</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Set a Recycling Reminder</h2>
+    <input type="datetime-local" id="reminderTime">
+    <button onclick="setReminder()">Set Reminder</button>
+    <p id="reminderStatus"></p>
+    <button onclick="window.location.href='dashboard.html'">Back to Dashboard</button>
+  </div>
+
+  <script>
+    function setReminder() {
+      console.log("Button clicked"); // Debug log
+      const time = document.getElementById("reminderTime").value;
+      const status = document.getElementById("reminderStatus");
+
+      if (!time) {
+        status.textContent = "Please select a valid date and time.";
+        return;
+      }
+
+      const reminderDate = new Date(time);
+      const now = new Date();
+      const delay = reminderDate.getTime() - now.getTime();
+
+      if (delay <= 0) {
+        status.textContent = "Time must be in the future.";
+        return;
+      }
+
+      setTimeout(() => {
+        alert("Time to recycle! ♻");
+      }, delay);
+
+      status.textContent = `Reminder set for ${reminderDate.toLocaleString()}`;
+    }
+  </script>
+</body>
+</html>
